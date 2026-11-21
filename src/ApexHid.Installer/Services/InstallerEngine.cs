@@ -206,41 +206,72 @@ public sealed class InstallerEngine
     {
         int count = 0;
         long bytes = 0;
+        Directory.CreateDirectory(installDir);
 
-        void CopyDirectoryFiles(string sourceDir, string targetDir)
+        // 1. Deploy bundled standalone self-contained ApexHid.App.exe from single-file self-extract payload
+        string baseDir = AppContext.BaseDirectory;
+        string[] candidateAppExes =
+        [
+            Path.Combine(baseDir, "payload", "ApexHid.App.exe"),
+            Path.Combine(baseDir, "ApexHid.App.exe"),
+            Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "Payload", "ApexHid.App.exe"))
+        ];
+
+        bool deployedStandaloneApp = false;
+        foreach (string candidate in candidateAppExes)
         {
-            if (!Directory.Exists(sourceDir)) return;
-            Directory.CreateDirectory(targetDir);
-
-            foreach (string file in Directory.GetFiles(sourceDir))
+            if (File.Exists(candidate))
             {
-                string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext is ".exe" or ".dll" or ".json" or ".inf" or ".sys")
+                string destApp = Path.Combine(installDir, "ApexHid.App.exe");
+                File.Copy(candidate, destApp, overwrite: true);
+                bytes += new FileInfo(destApp).Length;
+                count++;
+                deployedStandaloneApp = true;
+                break;
+            }
+        }
+
+        // Fallback for local dev tree if payload was not pre-published
+        if (!deployedStandaloneApp)
+        {
+            string? siblingAppDir = FindSiblingAppBuildDir(baseDir);
+            if (!string.IsNullOrWhiteSpace(siblingAppDir) && Directory.Exists(siblingAppDir))
+            {
+                foreach (string file in Directory.GetFiles(siblingAppDir))
                 {
-                    string dest = Path.Combine(targetDir, Path.GetFileName(file));
-                    try
+                    string ext = Path.GetExtension(file).ToLowerInvariant();
+                    if (ext is ".exe" or ".dll" or ".json")
                     {
+                        string dest = Path.Combine(installDir, Path.GetFileName(file));
                         File.Copy(file, dest, overwrite: true);
                         bytes += new FileInfo(dest).Length;
                         count++;
-                    }
-                    catch
-                    {
-                        // Ignore locked self-executable if installing into current folder
                     }
                 }
             }
         }
 
-        string baseDir = AppContext.BaseDirectory;
-        CopyDirectoryFiles(baseDir, installDir);
-
-        string? siblingAppDir = FindSiblingAppBuildDir(baseDir);
-        if (!string.IsNullOrWhiteSpace(siblingAppDir))
+        // 2. Copy standalone APEX-HID-Setup.exe to installDir so Windows Apps & Features uninstaller works offline
+        string? currentSetupExe = Environment.ProcessPath;
+        if (!string.IsNullOrWhiteSpace(currentSetupExe) && File.Exists(currentSetupExe))
         {
-            CopyDirectoryFiles(siblingAppDir, installDir);
+            string destSetup = Path.Combine(installDir, "APEX-HID-Setup.exe");
+            if (!string.Equals(Path.GetFullPath(currentSetupExe), Path.GetFullPath(destSetup), StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    File.Copy(currentSetupExe, destSetup, overwrite: true);
+                    bytes += new FileInfo(destSetup).Length;
+                    count++;
+                }
+                catch
+                {
+                    // Ignore if locked
+                }
+            }
         }
 
+        // 3. Deploy bundled WHQL-signed hidusbf driver files (hidusbf.inf & hidusbf.sys)
         var (localInf, localSys) = SerialLockPollingEngine.ResolveLocalDriverAssets();
         string driverDestDir = Path.Combine(installDir, "assets", "driver");
         string amd64AsDestDir = Path.Combine(driverDestDir, "amd64_as");
@@ -297,14 +328,14 @@ public sealed class InstallerEngine
             if (key == null) return;
 
             key.SetValue("DisplayName", "APEX-HID Precision Suite", RegistryValueKind.String);
-            key.SetValue("DisplayVersion", "1.4.0", RegistryValueKind.String);
+            key.SetValue("DisplayVersion", "1.0.1", RegistryValueKind.String);
             key.SetValue("Publisher", "APEX Precision Hardware Systems", RegistryValueKind.String);
             key.SetValue("InstallLocation", installDir, RegistryValueKind.String);
             key.SetValue("DisplayIcon", File.Exists(appExe) ? appExe : setupExe, RegistryValueKind.String);
             key.SetValue("UninstallString", $"\"{setupExe}\" --uninstall", RegistryValueKind.String);
             key.SetValue("NoModify", 1, RegistryValueKind.DWord);
             key.SetValue("NoRepair", 1, RegistryValueKind.DWord);
-            key.SetValue("EstimatedSize", 28450, RegistryValueKind.DWord);
+            key.SetValue("EstimatedSize", 74000, RegistryValueKind.DWord);
         }
         catch
         {

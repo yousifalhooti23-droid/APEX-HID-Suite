@@ -25,7 +25,7 @@ public sealed class GitHubReleaseUpdater
     private static readonly HttpClient Http = CreateClient();
 
     public string RepositorySlug { get; set; } = "yousifalhooti23-droid/APEX-HID-Suite";
-    public Version CurrentVersion { get; } = new(1, 4, 0);
+    public Version CurrentVersion { get; } = new(1, 0, 1);
 
     private static HttpClient CreateClient()
     {

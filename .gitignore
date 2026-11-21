@@ -4,6 +4,7 @@ obj/
 out/
 publish/
 artifacts/
+src/ApexHid.Installer/Payload/
 *.user
 *.suo
 *.userosscache

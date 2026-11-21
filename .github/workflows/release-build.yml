@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-and-release:
-    name: Compile .NET 8 Windows x64 & Package Setup
+    name: Compile Self-Contained .NET 8 Windows x64 & Package Setup
     runs-on: windows-latest
 
     steps:
@@ -32,24 +32,35 @@ jobs:
       - name: Build Solution (Release x64)
         run: dotnet build APEX-HID-Suite.sln --configuration Release --no-restore
 
-      - name: Publish ApexHid.App (Main Desktop Suite)
+      - name: Publish Standalone Self-Contained ApexHid.App.exe
         run: |
           dotnet publish src/ApexHid.App/ApexHid.App.csproj `
             --configuration Release `
             --runtime win-x64 `
-            --self-contained false `
+            --self-contained true `
             -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:IncludeAllContentForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true `
             -p:DebugType=None `
             --output publish/APEX-HID-Suite
 
-      - name: Publish ApexHid.Installer (APEX-HID-Setup.exe)
+      - name: Stage Standalone App Payload for Installer Bundling
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path src/ApexHid.Installer/Payload | Out-Null
+          Copy-Item "publish/APEX-HID-Suite/ApexHid.App.exe" "src/ApexHid.Installer/Payload/ApexHid.App.exe" -Force
+
+      - name: Publish Standalone Self-Contained APEX-HID-Setup.exe
         run: |
           dotnet publish src/ApexHid.Installer/ApexHid.Installer.csproj `
             --configuration Release `
             --runtime win-x64 `
-            --self-contained false `
+            --self-contained true `
             -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
             -p:IncludeAllContentForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true `
             -p:DebugType=None `
             --output publish/Installer
 
@@ -58,14 +69,16 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
           Copy-Item "publish/Installer/APEX-HID-Setup.exe" "artifacts/APEX-HID-Setup.exe" -Force
-          Copy-Item "publish/Installer/APEX-HID-Setup.exe" "publish/APEX-HID-Suite/APEX-HID-Setup.exe" -Force
+          Copy-Item "publish/APEX-HID-Suite/ApexHid.App.exe" "artifacts/ApexHid.App.exe" -Force
           Compress-Archive -Path "publish/APEX-HID-Suite/*" -DestinationPath "artifacts/APEX-HID-Suite-win-x64.zip" -Force
 
           $setupHash = (Get-FileHash "artifacts/APEX-HID-Setup.exe" -Algorithm SHA256).Hash
+          $appHash   = (Get-FileHash "artifacts/ApexHid.App.exe" -Algorithm SHA256).Hash
           $zipHash   = (Get-FileHash "artifacts/APEX-HID-Suite-win-x64.zip" -Algorithm SHA256).Hash
 
           @(
             "$setupHash  APEX-HID-Setup.exe"
+            "$appHash  ApexHid.App.exe"
             "$zipHash  APEX-HID-Suite-win-x64.zip"
           ) | Set-Content -Path "artifacts/SHA256SUMS.txt" -Encoding UTF8
 
@@ -77,6 +90,7 @@ jobs:
           name: APEX-HID-Suite-win-x64
           path: |
             artifacts/APEX-HID-Setup.exe
+            artifacts/ApexHid.App.exe
             artifacts/APEX-HID-Suite-win-x64.zip
             artifacts/SHA256SUMS.txt
 
@@ -86,6 +100,7 @@ jobs:
         with:
           files: |
             artifacts/APEX-HID-Setup.exe
+            artifacts/ApexHid.App.exe
             artifacts/APEX-HID-Suite-win-x64.zip
             artifacts/SHA256SUMS.txt
           generate_release_notes: true

@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
-    <Version>1.4.0</Version>
+    <Version>1.0.1</Version>
     <Company>APEX Precision Hardware Systems</Company>
     <Product>APEX-HID-Suite Core Engine</Product>
   </PropertyGroup>
