@@ -1,0 +1,325 @@
+<Window x:Class="ApexHid.Installer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ApexHid.Core.Controls;assembly=ApexHid.Core"
+        Title="APEX-HID Suite Setup"
+        Width="1060"
+        Height="750"
+        MinWidth="940"
+        MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowCanvasBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        FlowDirection="{Binding Loc.CurrentFlowDirection}"
+        FontFamily="{Binding Loc.PrimaryFontFamily}"
+        Typography.NumeralAlignment="Tabular"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="52"
+                      ResizeBorderThickness="6"
+                      GlassFrameThickness="1"
+                      CornerRadius="16"
+                      UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <!-- Seamless Unified "Arctic Liquid Glass" Canvas (Glacial Light #F2F8FC->#E3EFF8->#D6E7F4 | Arctic Dark #060B12->#0A1320->#070E18) -->
+    <Grid Background="{DynamicResource WindowCanvasBrush}">
+        <Canvas IsHitTestVisible="False" ClipToBounds="True">
+            <Ellipse Width="600" Height="400" Canvas.Left="-120" Canvas.Top="-100"
+                     Fill="{DynamicResource AmbientGlowTopLeftBrush}" />
+            <Ellipse Width="640" Height="440" Canvas.Right="-140" Canvas.Bottom="-140"
+                     Fill="{DynamicResource AmbientGlowBottomRightBrush}" />
+        </Canvas>
+
+        <Grid Margin="20,10,20,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="52" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- SEAMLESS TOP BAR -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="34" Height="34" CornerRadius="10"
+                            Background="{DynamicResource AppleAccentGradientBrush}"
+                            BorderBrush="#77FFFFFF" BorderThickness="1"
+                            Margin="0,0,12,0">
+                        <TextBlock Text="⬇" FontSize="15" FontWeight="Bold" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Loc[InstallerTitle]}" FontSize="15" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" />
+                            <Border CornerRadius="6"
+                                    Background="{DynamicResource SubCardSurfaceBrush}"
+                                    BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="7,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="APEX-HID-Setup.exe · v1.4.0" FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource AppleBlueBrush}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Loc[InstallerSubtitle]}" FontSize="11.5"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Arctic Theme Switcher ("Glacial Light ❄️ | Arctic Dark 🌑") + Bilingual Language Switch ("العربية | EN") + Window Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="ThemeToggleBtn"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Style="{StaticResource SecondaryGlassButtonStyle}"
+                            Padding="13,7" Margin="0,0,10,0"
+                            Click="OnToggleThemeClick">
+                        <TextBlock Text="{Binding Theme.ThemeToggleLabel}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                    </Button>
+
+                    <Button x:Name="LanguageToggleBtn"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Style="{StaticResource SecondaryGlassButtonStyle}"
+                            Padding="13,7" Margin="0,0,12,0"
+                            Click="OnToggleLanguageClick">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🌐" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Loc[LangToggleText]}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource WindowControlButtonStyle}" Content="─" Click="OnMinimizeClick" />
+                    <Button Style="{StaticResource WindowControlButtonStyle}" Content="✕" Click="OnCloseClick" Margin="2,0,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <!-- INSTALLER WORKSPACE -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <!-- SECTION 1: Windows 10/11 System Compatibility & Pre-Flight Verification -->
+                    <controls:LiquidGlassCard CornerRadius="18" CardPadding="20" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Loc[Step1Header]}" FontSize="14.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+                            <UniformGrid Columns="3">
+                                <Border CornerRadius="12"
+                                        Background="{DynamicResource SubCardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                        BorderThickness="1" Padding="14,10" Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Loc[OsCheckTitle]}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock x:Name="OsBuildStatusText" Text="Windows 11 x64 · Verified" FontSize="12.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppleGreenBrush}" Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Border>
+                                <Border CornerRadius="12"
+                                        Background="{DynamicResource SubCardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                        BorderThickness="1" Padding="14,10" Margin="4,0,4,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Loc[UsbCheckTitle]}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="xHCI 1.00ms Interrupt Ready" FontSize="12.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppleBlueBrush}" Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Border>
+                                <Border CornerRadius="12"
+                                        Background="{DynamicResource SubCardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                        BorderThickness="1" Padding="14,10" Margin="8,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Loc[IntegrityCheckTitle]}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="Secure Boot = ON · HVCI = ON" FontSize="12.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppleGreenBrush}" Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                        </StackPanel>
+                    </controls:LiquidGlassCard>
+
+                    <!-- SECTION 2: Custom Install Directory Picker & Component Checkboxes -->
+                    <controls:LiquidGlassCard CornerRadius="18" CardPadding="20" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="{Binding Loc[Step2Header]}" FontSize="14.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock x:Name="DiskSpaceBadgeText" FlowDirection="LeftToRight" Text="128.4 GB Free"
+                                           FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AppleBlueBrush}" HorizontalAlignment="Right" />
+                            </Grid>
+
+                            <TextBlock Text="{Binding Loc[InstallPathLabel]}" FontSize="11.5"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="InstallPathTextBox"
+                                         Grid.Column="0"
+                                         Style="{StaticResource LiquidGlassTextBoxStyle}"
+                                         TextChanged="OnInstallPathTextChanged" />
+                                <Button Grid.Column="2"
+                                        Style="{StaticResource SecondaryGlassButtonStyle}"
+                                        Content="{Binding Loc[BrowseFolderBtn]}"
+                                        Click="OnBrowseFolderClick" />
+                            </Grid>
+
+                            <!-- Component Checkboxes -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <Border CornerRadius="12"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <CheckBox x:Name="ChkCoreEngine" Style="{StaticResource ApplePillToggleStyle}" IsChecked="True" IsEnabled="False"
+                                                      Content="{Binding Loc[CompCoreTitle]}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[CompCoreDesc]}" FontSize="11"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="54,3,0,0" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border CornerRadius="12"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="12,10">
+                                        <StackPanel>
+                                            <CheckBox x:Name="ChkWhqlDriver" Style="{StaticResource ApplePillToggleStyle}" IsChecked="True"
+                                                      Content="{Binding Loc[CompDriverTitle]}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[CompDriverDesc]}" FontSize="11"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="54,3,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <Border CornerRadius="12"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <CheckBox x:Name="ChkViGEmBridge" Style="{StaticResource ApplePillToggleStyle}" IsChecked="True"
+                                                      Content="{Binding Loc[CompBridgeTitle]}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[CompBridgeDesc]}" FontSize="11"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="54,3,0,0" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border CornerRadius="12"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="12,10">
+                                        <StackPanel>
+                                            <CheckBox x:Name="ChkShortcuts" Style="{StaticResource ApplePillToggleStyle}" IsChecked="True"
+                                                      Content="{Binding Loc[CreateDesktopShortcut]}" Margin="0,0,0,8" />
+                                            <CheckBox x:Name="ChkRegistryApps" Style="{StaticResource ApplePillToggleStyle}" IsChecked="True"
+                                                      Content="{Binding Loc[RegisterAppsFeatures]}" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </controls:LiquidGlassCard>
+
+                    <!-- SECTION 3: Live Download & Extraction Manager UI -->
+                    <controls:LiquidGlassCard CornerRadius="18" CardPadding="20">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="{Binding Loc[Step3Header]}" FontSize="14.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" FlowDirection="LeftToRight">
+                                    <Border CornerRadius="8"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="10,3" Margin="0,0,8,0">
+                                        <TextBlock x:Name="LiveSpeedText" Text="0.0 MB/s" FontSize="12" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppleBlueBrush}"
+                                                   Typography.NumeralAlignment="Tabular" />
+                                    </Border>
+                                    <Border CornerRadius="8"
+                                            Background="{DynamicResource SubCardSurfaceBrush}"
+                                            BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                            BorderThickness="1" Padding="10,3">
+                                        <TextBlock x:Name="LivePercentText" Text="0%" FontSize="12" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppleGreenBrush}"
+                                                   Typography.NumeralAlignment="Tabular" />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock x:Name="CurrentStageLabel"
+                                       Text="Ready to install APEX-HID Suite v1.4.0 (WHQL Edition)"
+                                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" />
+
+                            <!-- Smooth Liquid Glass Progress Bar -->
+                            <Border Height="12" CornerRadius="6"
+                                    Background="{DynamicResource SubCardSurfaceBrush}"
+                                    BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                    BorderThickness="1"
+                                    ClipToBounds="True" Margin="0,0,0,12">
+                                <Border x:Name="GlassProgressBarFill"
+                                        HorizontalAlignment="Left"
+                                        Width="0"
+                                        CornerRadius="5"
+                                        Background="{DynamicResource AppleAccentGradientBrush}" />
+                            </Border>
+
+                            <!-- Step-by-Step Installation Log -->
+                            <Border Height="115" CornerRadius="12"
+                                    Background="{DynamicResource ConsoleSurfaceBrush}"
+                                    BorderBrush="{DynamicResource SubCardBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="12,8" Margin="0,0,0,14">
+                                <ScrollViewer x:Name="InstallLogScrollViewer" VerticalScrollBarVisibility="Auto">
+                                    <TextBlock x:Name="InstallLogTextBlock"
+                                               FlowDirection="LeftToRight"
+                                               FontFamily="Consolas, Inter, Segoe UI"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               TextWrapping="Wrap"
+                                               Text="[READY] APEX-HID-Setup.exe initialized · GitHub Releases Auto-Updater active." />
+                                </ScrollViewer>
+                            </Border>
+
+                            <!-- Action Buttons: Install, Uninstall/Restore Defaults, Launch App -->
+                            <Grid>
+                                <WrapPanel>
+                                    <Button x:Name="InstallNowBtn"
+                                            Style="{StaticResource PrimaryGlassButtonStyle}"
+                                            Content="{Binding Loc[StartInstallBtn]}"
+                                            Margin="0,0,10,0"
+                                            Click="OnStartInstallClick" />
+                                    <Button x:Name="UninstallBtn"
+                                            Style="{StaticResource SecondaryGlassButtonStyle}"
+                                            Content="{Binding Loc[UninstallRestoreBtn]}"
+                                            Click="OnUninstallRestoreClick" />
+                                </WrapPanel>
+
+                                <Button x:Name="LaunchInstalledAppBtn"
+                                        Style="{StaticResource PrimaryGlassButtonStyle}"
+                                        Content="{Binding Loc[LaunchAppBtn]}"
+                                        HorizontalAlignment="Right"
+                                        Visibility="Collapsed"
+                                        Click="OnLaunchInstalledAppClick" />
+                            </Grid>
+                        </StackPanel>
+                    </controls:LiquidGlassCard>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

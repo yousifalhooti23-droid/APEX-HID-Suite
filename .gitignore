@@ -1,0 +1,18 @@
+## .NET / Visual Studio Ignore Rules
+bin/
+obj/
+out/
+publish/
+artifacts/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+*.nupkg
+*.snupkg
+TestResults/
+*.log
+*.pdb
+!src/**/*.csproj
